@@ -1,2 +1,2 @@
 # CSCI178GameProject
-2D game for final project, csci 178 spring 26
+This project is a 2D platformer game developed as a final project for a Computer Science course.
