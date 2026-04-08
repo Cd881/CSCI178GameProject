@@ -7,7 +7,12 @@ _player::_player()
     yMin = 0;
     yMax = 1.0;
 
-    pos.y = -1.2;
+    pos.y = -2.2;
+    pos.z = -12;
+    scale.x = 0.7;
+    scale.y = 0.7;
+
+    actionTrigger = STAND;
 }
 
 _player::~_player()
@@ -18,19 +23,15 @@ _player::~_player()
 void _player::playerInit(int x, int y, char* filename)
 {
     initQuad(filename);
-    xFrames = x;
-    yFrames = y;
+    xFrames =x;
+    yFrames =y;
 
-    xMin = 0.0;
-    xMax = 1.0/(float)xFrames;
-    yMin = 0.0;
-    yMax = 1.0/(float)yFrames;
+    xMin =0;
+    xMax =1.0/(float)xFrames;
+    yMax =1.0/(float)yFrames;
+    yMin =0;
 
-    pos.z = -25.0;
-    pos.y = -6.8;
-
-    yMin = yMax*2.0;
-    yMax += yMax*2.0;
+    speed = 5.5;
 }
 
 void _player::playerActions(float deltaTime)
@@ -38,47 +39,45 @@ void _player::playerActions(float deltaTime)
     timer += deltaTime;
     switch(actionTrigger) {
     case STAND:
-        xMin = 0.0;
-        xMax = 1.0/(float)xFrames;
-        yMin = yMax-1.0/(float)yFrames;
-        yMax = 1.0/(float)yFrames;
+        //does make it bouce a little
+        //but it looks like the rocket is actually boosting
+        if(rot.z > 0) rot.z -= 90 * deltaTime;
+        else if(rot.z < 0) rot.z += 90 * deltaTime;
+        if(timer>0.25) {
+            xMin +=1.0/(float)xFrames;
+            xMax +=1.0/(float)xFrames;
+            timer =0;
+        }
         break;
     case LEFTWALK:
-        if(timer>0.15) {
-            xMin += 1.0/(float)xFrames;
-            xMax += 1.0/(float)xFrames;
-            yMin = 1.0/4.0;
-            yMax = 1.0/2.0;
-            timer = 0;
-        }
-        break;
+        if(rot.z < 15) rot.z += 90 * deltaTime;
+
+        if(pos.x > -7.5) pos.x -= speed*deltaTime;
+        if(timer>0.08) {
+            xMin +=1.0/(float)xFrames;
+            xMax +=1.0/(float)xFrames;
+
+          timer =0;
+         }
+         break;
     case RIGHTWALK:
-        if(timer>0.15) {
-            xMin += 1.0/(float)xFrames;
-            xMax += 1.0/(float)xFrames;
-            yMin = 1.0/2.0;
-            yMax = 3.0/4.0;
-            timer = 0;
-        }
-        break;
-    case UPWALK:
-        if(timer>0.15) {
-            xMin += 1.0/(float)xFrames;
-            xMax += 1.0/(float)xFrames;
-            yMin = 3.0/4.0;
-            yMax = 1.0;
-            timer = 0;
-        }
-        break;
-    case BACKWALK:
-        if(timer>0.15) {
-            xMin += 1.0/(float)xFrames;
-            xMax += 1.0/(float)xFrames;
-            yMin = 0.0;
-            yMax = 1.0/4.0;
-            timer = 0;
-        }
-    break;
+        if(rot.z > -15) rot.z -= 90 * deltaTime;
+
+        if(pos.x < 7.5) pos.x += speed*deltaTime;
+        if(timer>0.08) {
+            xMin +=1.0/(float)xFrames;
+            xMax +=1.0/(float)xFrames;
+
+            timer =0;
+         }
+         break;
     default: break;
     }
+}
+
+void _player::reset()
+{
+    rot.z = 0;
+    pos.x = 0;
+    actionTrigger = STAND;
 }

@@ -54,7 +54,8 @@ void _quad::initQuad(char* filename)
     glBindBuffer(GL_ARRAY_BUFFER, vboTex);
     glBufferData(GL_ARRAY_BUFFER, sizeof(texCoord), texCoord, GL_DYNAMIC_DRAW);
 
-    myTex->loadTexture(filename);
+    if(filename)
+        myTex->loadTexture(filename);
 }
 
 void _quad::updateQuad()

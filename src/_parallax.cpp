@@ -6,6 +6,11 @@ _parallax::_parallax()
     xMin = 0.0;
     yMax = 1.0;
     yMin = 0.0;
+
+    depth = -13;
+    scale.x = 5.33;
+    scale.y = 5.33;
+    scale.z = 1.0;
 }
 
 _parallax::~_parallax()
@@ -46,23 +51,26 @@ void _parallax::scroll(bool isAuto, int dir, float speed)
 
 void _parallax::drawBackground(float w, float h)
 {
+    glPushMatrix();
+    glScalef(scale.x, scale.y, scale.z);
     glColor3f(1.0, 1.0, 1.0);
     background->bindTexture();
 
     glDisable(GL_LIGHTING);
     glBegin(GL_POLYGON);
         glTexCoord2f(xMin, yMax);
-        glVertex3f(-w/h, -1.0, -30.0);
+        glVertex3f(-w/h, -1.0, depth);
 
         glTexCoord2f(xMax, yMax);
-        glVertex3f(w/h, -1.0, -30.0);
+        glVertex3f(w/h, -1.0, depth);
 
         glTexCoord2f(xMax, yMin);
-        glVertex3f(w/h, 1.0, -30.0);
+        glVertex3f(w/h, 1.0, depth);
 
         glTexCoord2f(xMin, yMin);
-        glVertex3f(-w/h, 1.0, -30.0);
+        glVertex3f(-w/h, 1.0, depth);
     glEnd();
     glEnable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
 }

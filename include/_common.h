@@ -18,9 +18,9 @@
 using namespace std;
 
 typedef struct {
-    float x;
-    float y;
-    float z;
+    double x;
+    double y;
+    double z;
 }vec3;
 
 typedef struct {

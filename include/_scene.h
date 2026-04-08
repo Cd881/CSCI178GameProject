@@ -12,6 +12,8 @@
 #include <_sounds.h>
 #include <_enemy.h>
 #include <_collisionCheck.h>
+#include <_bullets.h>
+#include <_asteroid.h>
 
 class _scene
 {
@@ -24,20 +26,30 @@ class _scene
         void reSize(GLint, GLint); // Handles window resizing
         void drawScene(); // Render the final scene
 
+        void mouseMapping(int,int);
+
         int winMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
         static float deltaTime;
 
-        _lightSettings *myLight = new _lightSettings();
-        _inputs *myKbMs = new _inputs();
-        _parallax *myPrlx = new _parallax();
+        _lightSettings *lights = new _lightSettings();
+        _inputs *input = new _inputs();
+        _parallax *bkgd = new _parallax();
+        _parallax *bkgd2 = new _parallax();
+        _parallax *won = new _parallax();
         _player *player = new _player();
-        _sounds *myMusic = new _sounds();
         _collisionCheck *hit = new _collisionCheck();
 
-        _enemy enemies[20];
+        const static int ASTEROID_SIZE = 15;
+        const static int ENMS_SIZE = 5;
+        _asteroid asteroids[ASTEROID_SIZE];
+        _enemy enemies[ENMS_SIZE];
 
-        vec2 dim;
+        int score;
+        bool lvl2, isGameOver;
+
+        vec3 mouse; //to keep track of the mouse loc
+        vec2 dim; //window size
 
     protected:
 

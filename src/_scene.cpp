@@ -4,16 +4,24 @@ auto prevTime = chrono::steady_clock::now();
 
 _scene::_scene()
 {
-    //ctor
+    mouse.x = 0.0;
+    mouse.y = 0.0;
+    mouse.z = -6.0;
+
+    score = 0;
+    lvl2 = false;
+    isGameOver = false;
 }
 
 _scene::~_scene()
 {
-    delete myLight;
-    delete myKbMs;
-    delete myPrlx;
+    delete lights;
+    delete bkgd;
+    delete bkgd2;
+    delete won;
     delete player;
-    delete myMusic;
+    delete input;
+    delete hit;
 }
 
 GLint _scene::initGL()
@@ -28,23 +36,24 @@ GLint _scene::initGL()
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
-    //glEnable(GL_COLOR_MATERIAL);// wont need for 2d cause you will use textures instead of materials
-    myLight->setLight(GL_LIGHT0);
+    bkgd->initPrlx("images/spacebackground.png");
+    bkgd2->initPrlx("images/space2.png");
+    won->initPrlx("images/won.png");
 
-    myPrlx->initPrlx("images/prlx.jpg");
-
-    player->playerInit(4.0, 4.0, "images/players.png");
-
-    myMusic->initSounds();
-    //myMusic->playMusic("sounds/music1.mp3");
-
-    for(int i = 0; i < 20; i++) {
-        enemies[i].enemyInit(7, 2, "images/mon.png"); //TODO:: fix repeat read of file
-        enemies[i].pos.x = (float)rand()/(float)(RAND_MAX)*10.0 - 4.0;
-        float s = 0.8 + (float)(rand()%12)/10.0;
-        enemies[i].scale.x = s;
-        enemies[i].scale.y = s;
+    asteroids[0].initAsteroid(rand()%16, "images/Asteroids.png");
+    asteroids[0].altTex->loadTexture("images/Asteroids2.png");
+    for(int i = 1; i < ASTEROID_SIZE; i++) {
+        asteroids[i].myTex = asteroids[0].myTex;
+        asteroids[i].initAsteroid(rand()%16, NULL);
     }
+
+    enemies[0].enemyInit(4, 2, "images/newenms.png");
+    for(int i = 1; i < ENMS_SIZE; i++) {
+        enemies[i].myTex = enemies[0].myTex;
+        enemies[i].enemyInit(4, 2, NULL);
+    }
+
+    player->playerInit(4,1,"images/ship.png");
 
     return true;
 }
@@ -78,47 +87,148 @@ void _scene::drawScene()
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // Clear buffers
     glLoadIdentity();
 
-    glPushMatrix(); //background
-        glScalef(13.3, 13.3, 1.0);
-        myPrlx->drawBackground(dim.x, dim.y);
-        myPrlx->scroll(true, myPrlx->RIGHT, 0.05 * deltaTime);
-    glPopMatrix();
+    if(score < 10) {
+        bkgd->drawBackground(dim.x, dim.y);
+        bkgd->scroll(true, bkgd->UP, 0.1 * deltaTime);
+    }else if(score < 25) {//level 2
+        if(!lvl2) {//do once on level 2 start
+            player->reset();
+            for(int l = 0; l < ENMS_SIZE; l++) {
+                    enemies[l].reset();
+                    enemies[l].speed += 2.8; //make it harder
+            }
+            for(int l = 0; l < ASTEROID_SIZE; l++) {
+                    asteroids[l].reset();
+                    asteroids[l].myTex = asteroids[0].altTex;
+            }
+        }
+        lvl2 = true;
 
-    player->playerActions(deltaTime);
-    player->updateQuad();
-    player->drawQuad();
+        bkgd2->drawBackground(dim.x, dim.y);
+        bkgd2->scroll(true, bkgd2->UP, 0.1 * deltaTime);
+    } else {
+        isGameOver = true;
+        won->drawBackground(dim.x,dim.y);
+    }
 
-    for(int i = 0; i < 20; i++) {
-            if(hit->isRadialCol(enemies[i].pos, player->pos, 0.2, 0.3, 0.6)) {
-                if (player->actionTrigger == player->RIGHTWALK && enemies[i].actionTrigger == enemies[i].LEFTWALK) {
-                    enemies[i].actionTrigger = enemies[i].ROLRIGHT;
+    if(!isGameOver) {
+        player->playerActions(deltaTime);
+        player->updateQuad();
+        player->drawQuad();
+
+        for(int i = 0; i < ASTEROID_SIZE; i++) {
+            //could not find a good collision behavior for the asteroids
+            //made them not reach the player before being hit by another asteroid
+            /*for(int j = i+1; j < ASTEROID_SIZE; j++) {
+                if(hit->isRadialCol(asteroids[i].pos, asteroids[j].pos, asteroids[i].scale.x, asteroids[j].scale.x, 0.01)) {
+                // asteroid asteroid collision
                 }
-                if (player->actionTrigger == player->LEFTWALK && enemies[i].actionTrigger == enemies[i].RIGHTWALK) {
-                    enemies[i].actionTrigger = enemies[i].ROLLEFT;
+            }*/
+
+            if(hit->isRadialCol(asteroids[i].pos, player->pos, asteroids[i].scale.x, 0.5, 0.008)) {//asteroid player collision
+                //player hit asteroid
+                if(!asteroids[i].isHit) {
+                    asteroids[i].isHit = true;
+
+                    vec2 normal;
+                    normal.x = asteroids[i].pos.x - player->pos.x;
+                    normal.y = asteroids[i].pos.y - player->pos.y;
+
+                    float len = sqrt(normal.x*normal.x + normal.y*normal.y);//normalize
+                    normal.x /= len;
+                    normal.y /= len;
+
+                    asteroids[i].dirVec = normal;
+                    asteroids[i].hitDir = asteroids[i].HIT;
+                    //old janky collision
+                    /*if(player->actionTrigger == player->RIGHTWALK) {
+                        if(asteroids[i].pos.y <= player->pos.y + 0.35)
+                            asteroids[i].hitDir = asteroids[i].RIGHT;
+                        else asteroids[i].hitDir = asteroids[i].UPRIGHT;
+                    }
+                    if(player->actionTrigger == player->LEFTWALK) {
+                        if(asteroids[i].pos.y <= player->pos.y + 0.35)
+                            asteroids[i].hitDir = asteroids[i].LEFT;
+                        else asteroids[i].hitDir = asteroids[i].UPLEFT;
+                    }
+                    if(player->actionTrigger == player->STAND) asteroids[i].hitDir = asteroids[i].UP;*/
                 }
             }
+
+            for(int k = 0; k < ENMS_SIZE; k++) {
+                if(hit->isRadialCol(enemies[k].pos, asteroids[i].pos, 0.2, asteroids[i].scale.x, 0.0000000001)) {
+                    //asteroid enemy collision
+                    if(asteroids[i].isHit && enemies[k].isEnmsLive) {
+                        enemies[k].isEnmsLive = false;
+                        enemies[k].actionTrigger = enemies[k].DEAD;
+                        score++;
+                    }
+                }
+                if(hit->isRadialCol(player->pos, enemies[k].pos, 0.3, 0.4, 0.002)) {
+                    //player died reset level
+                    if(enemies[k].isEnmsLive) {
+                        if(lvl2) score = 10;
+                        else score = 0;
+                        player->reset();
+
+                        for(int l = 0; l < ENMS_SIZE; l++) enemies[l].reset();
+                        for(int l = 0; l < ASTEROID_SIZE; l++)asteroids[l].reset();
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i < ENMS_SIZE; i ++) {
             enemies[i].enemyActions(deltaTime);
             enemies[i].drawEnemy();
+        }
+
+        for(int i = 0; i < ASTEROID_SIZE; i++) {
+            asteroids[i].animate(deltaTime);
+            asteroids[i].drawAsteroid();
+        }
     }
 }
+
+void _scene::mouseMapping(int x, int y)
+{
+    GLint viewPort[4]; //for window
+    GLdouble modelViewM[16]; //model and camera
+    GLdouble projectionM[16]; //projection
+    GLfloat winX,winY,winZ; // mouse clicks
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelViewM);
+    glGetDoublev(GL_PROJECTION_MATRIX, projectionM);
+    glGetIntegerv(GL_VIEWPORT, viewPort);
+
+    winX = (GLfloat)x;
+    winY = (GLfloat)(viewPort[3] - y);
+
+    glReadPixels(x,(int)winY,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&winZ);
+
+    gluUnProject(winX,winY,winZ,modelViewM,projectionM,viewPort,&mouse.x,&mouse.y,&mouse.z);
+}
+
 
 int _scene::winMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch(uMsg) {
     case WM_KEYDOWN:
-        myKbMs->wParam = wParam;
-        myKbMs->keyPressed(player);
+        input->wParam = wParam;
+        input->keys[wParam] = true;
+        input->keyPressed(player);
         break;
     case WM_KEYUP:
-        player->actionTrigger = player->STAND;
+        input->wParam = wParam;
+        input->keys[wParam] = false;
+        input->keyUp(player);
         break;
     case WM_LBUTTONDOWN:
     case WM_RBUTTONDOWN:
-        myKbMs->wParam = wParam;
+        input->wParam = wParam;
         break;
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
-        myKbMs->mouseEventUp();
         break;
     case WM_MOUSEMOVE:
         break;

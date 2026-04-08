@@ -13,6 +13,7 @@ class _collisionCheck
         bool isRadialCol(vec3, vec3,float,float,float);
         bool isPlaneCol(vec3, vec3);
 
+
     protected:
 
     private:

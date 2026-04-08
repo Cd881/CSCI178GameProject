@@ -17,6 +17,9 @@ class _player:public _quad
 
         void playerInit(int,int,char*);
         void playerActions(float);
+        void reset();
+
+        float speed;
 
     protected:
 

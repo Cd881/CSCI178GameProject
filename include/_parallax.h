@@ -19,6 +19,9 @@ class _parallax
         float xMax, xMin, yMax, yMin;
         enum{LEFT, RIGHT, UP, DOWN};
 
+        vec3 scale;
+        float depth;
+
     protected:
 
     private:

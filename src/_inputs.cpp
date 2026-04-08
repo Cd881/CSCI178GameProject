@@ -5,6 +5,11 @@ _inputs::_inputs()
     //ctor
     isRotation = false;
     isTranslate = false;
+
+    isPressedLeft = false;
+    isPressedRight = false;
+    for(int i = 0; i < 256; i++)
+        keys[i] = false;
 }
 
 _inputs::~_inputs()
@@ -144,20 +149,11 @@ void _inputs::mouseWheel(_modelVBO* mdlv, double delta)
 
 void _inputs::keyPressed(_player* p)
 {
-    switch(wParam){
-    case VK_LEFT:
-        p->actionTrigger = p->LEFTWALK;
-        break;
-    case VK_RIGHT:
-        p->actionTrigger = p->RIGHTWALK;
-        break;
-    case VK_UP:
-        p->actionTrigger = p->UPWALK;
-        break;
-    case VK_DOWN:
-        p->actionTrigger = p->BACKWALK;
-        break;
-    default:
-        break;
-    }
+    if(keys[65] || keys[37]) p->actionTrigger = p->LEFTWALK;//a or left
+    if(keys[68] || keys[39]) p->actionTrigger = p->RIGHTWALK;//d or right
+}
+
+void _inputs::keyUp(_player *p)
+{
+    if(!keys[65] || !keys[68] || !keys[37] || !keys[39]) p->actionTrigger = p->STAND;
 }

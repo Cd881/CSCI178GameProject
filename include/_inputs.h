@@ -12,10 +12,11 @@ class _inputs
         _inputs();
         virtual ~_inputs();
 
-        void keyPressed(_model*);
-        void keyPressed(_modelVBO*);
+        void keyPressed(_model*);//dont need
+        void keyPressed(_modelVBO*);//dont need
         void keyPressed(_player*);
         void keyUP();
+        void keyUp(_player*);
 
         void mouseEventDown(_model*,double, double);
         void mouseEventUp();
@@ -28,8 +29,12 @@ class _inputs
         double prevMx;
         double prevMy;
 
+        bool keys[256];
+
         bool isTranslate;
         bool isRotation;
+        bool isPressedLeft;
+        bool isPressedRight;
 
         WPARAM wParam;
     protected:

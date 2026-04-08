@@ -10,19 +10,24 @@ class _enemy:public _quad
         _enemy();
         virtual ~_enemy();
 
-        float timer = 0;
-        int xFrames, yFrames;
+        float timer =0;
+        int xFrames,yFrames;
         int actionTrigger;
-        enum{STAND, LEFTWALK, RIGHTWALK, UPWALK, BACKWALK, RUN, JUMP, ATTACK, ROLLEFT, ROLRIGHT};
+        enum{STAND,LEFTWALK,RIGHTWALK,RUN,JUMP,ATTACK,ROLLEFT,ROLRIGHT,DEAD};
 
         void enemyInit(int,int,char*);
         void enemyActions(float);
         void placeEnemy(vec3);
         void drawEnemy();
+        void reset();
 
-        bool isAlive = true;
+        bool isEnmsLive = true;
+        int deadFrames; //how many frames enm has been dead
+        float speed;
 
-        float vel = 0, t = 0, theta = 0;
+        float vel = 0,
+              t = 0,
+              theta = 0;
 
     protected:
 
