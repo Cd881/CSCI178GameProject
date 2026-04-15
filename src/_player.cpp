@@ -7,7 +7,7 @@ _player::_player()
     yMin = 0;
     yMax = 1.0;
 
-    pos.y = -2.2;
+    pos.y = -3.2;
     pos.z = -12;
     scale.x = 0.7;
     scale.y = 0.7;

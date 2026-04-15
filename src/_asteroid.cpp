@@ -134,6 +134,8 @@ void _asteroid::initAsteroid(int index, char* filename) {
 
     rotFlag = rand()%3-1;
 
+    //TODO:: Fix this make the asteroids come more gradually rather than all 15
+    //also have to fix it in the reset function
     pos.z = -12.0;
     pos.x = (float)((rand()%40) - 21.0)/4.0;
     pos.y = ((float)((rand()%24) - 13.0)/4.0) + 6.0;
@@ -188,11 +190,13 @@ void _asteroid::animate(float deltaT)
             pos.y = ((float)((rand()%24) - 12.0)/4.0) + 10.0;
         }
     } else
-        if(pos.y <= -5) {
-            pos.x = ((float)((rand()%40) - 20.0)/4.0);
-            pos.y = ((float)((rand()%24) - 12.0)/4.0) + 10.0;
-        } else {
-            pos.y -= speed * deltaT;
+        if(hitDir != IDLE) {
+            if(pos.y <= -5) {
+                pos.x = ((float)((rand()%40) - 20.0)/4.0);
+                pos.y = ((float)((rand()%24) - 12.0)/4.0) + 10.0;
+            } else {
+                pos.y -= speed * deltaT;
+            }
         }
 }
 

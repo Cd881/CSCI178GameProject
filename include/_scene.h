@@ -14,6 +14,8 @@
 #include <_collisionCheck.h>
 #include <_bullets.h>
 #include <_asteroid.h>
+#include <_countdown.h>
+#include <_boss.h>
 
 class _scene
 {
@@ -36,9 +38,16 @@ class _scene
         _inputs *input = new _inputs();
         _parallax *bkgd = new _parallax();
         _parallax *bkgd2 = new _parallax();
+        _parallax *bkgd3 = new _parallax();
         _parallax *won = new _parallax();
         _player *player = new _player();
         _collisionCheck *hit = new _collisionCheck();
+        _boss *boss = new _boss();
+        _countdown *cD = new _countdown();
+        _sounds *sound = new _sounds();
+
+        int frame; //to keep track of frames for countdown
+        _parallax lvls[3];
 
         const static int ASTEROID_SIZE = 15;
         const static int ENMS_SIZE = 5;
@@ -46,7 +55,8 @@ class _scene
         _enemy enemies[ENMS_SIZE];
 
         int score;
-        bool lvl2, isGameOver;
+        bool lvl1, lvl2, lvl3, isGameOver, pause;
+        float timer;
 
         vec3 mouse; //to keep track of the mouse loc
         vec2 dim; //window size

@@ -18,7 +18,7 @@ class _asteroid:public _quad
         int hitDir;  //actionTrigger
         vec2 dirVec; //direction vector, that it has been hit at
         int rotFlag;//rotation dir (1,0, or -1) when hit
-        enum {LEFT, RIGHT, UP, UPLEFT, UPRIGHT, NONE, HIT};
+        enum {LEFT, RIGHT, UP, UPLEFT, UPRIGHT, NONE, HIT, IDLE};
 
         vec2 vel;
 

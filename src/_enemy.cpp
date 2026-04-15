@@ -46,7 +46,7 @@ void _enemy::enemyInit(int x, int y, char* filename)
     pos.y = ((float)((rand()%24) - 13.0)/4.0) + 12.0;
 }
 
-void _enemy::enemyActions(float deltaT)
+void _enemy::enemyActions(float deltaT, bool waitAfterReset)
 {
     timer += deltaT;
     switch(actionTrigger)
@@ -55,6 +55,7 @@ void _enemy::enemyActions(float deltaT)
             if(pos.y <= -5) {
                 pos.x = ((float)((rand()%40) - 20.0)/4.0);
                 pos.y = ((float)((rand()%24) - 12.0)/4.0) + 10.0;
+                if(waitAfterReset) actionTrigger = IDLE;
             } else pos.y -= speed * deltaT;
             if(timer>0.08) {
                 xMin +=1.0/(float)xFrames;
@@ -107,6 +108,12 @@ void _enemy::drawEnemy()
 
 void _enemy::reset()
 {
+    actionTrigger = STAND;
+    deadFrames = 0;
+
+    yMin = 0.0;
+    yMax = 1.0/(float)yFrames;
+
     pos.z = -12.0;
     pos.x = (float)((rand()%40) - 21.0)/4.0;
     pos.y = ((float)((rand()%24) - 13.0)/4.0) + 12.0;

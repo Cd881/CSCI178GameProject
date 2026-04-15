@@ -8,9 +8,15 @@ _scene::_scene()
     mouse.y = 0.0;
     mouse.z = -6.0;
 
+    timer = 0;
+
     score = 0;
+    pause = false;
+    lvl1 = false;
     lvl2 = false;
+    lvl3 = false;
     isGameOver = false;
+    frame = 0;
 }
 
 _scene::~_scene()
@@ -18,10 +24,14 @@ _scene::~_scene()
     delete lights;
     delete bkgd;
     delete bkgd2;
+    delete bkgd3;
     delete won;
     delete player;
     delete input;
     delete hit;
+    delete boss;
+    delete cD;
+    delete sound;
 }
 
 GLint _scene::initGL()
@@ -38,6 +48,7 @@ GLint _scene::initGL()
 
     bkgd->initPrlx("images/spacebackground.png");
     bkgd2->initPrlx("images/space2.png");
+    bkgd3->initPrlx("images/space3.png");
     won->initPrlx("images/won.png");
 
     asteroids[0].initAsteroid(rand()%16, "images/Asteroids.png");
@@ -53,7 +64,26 @@ GLint _scene::initGL()
         enemies[i].enemyInit(4, 2, NULL);
     }
 
+    boss->bossInit(4, 3, "images/boss.png");
+
     player->playerInit(4,1,"images/ship.png");
+
+    vec3 s;
+    s.z = 1;
+    s.x = s.y = 0.86;
+    lvls[0].initPrlx("images/lvl1.png");
+    lvls[0].depth = -2;
+    lvls[0].scale = s;
+    lvls[1].initPrlx("images/lvl2.png");
+    lvls[1].depth = -2;
+    lvls[1].scale = s;
+    lvls[2].initPrlx("images/lvl3.png");
+    lvls[2].depth = -2;
+    lvls[2].scale = s;
+
+    cD->countDownInit(1, 4, "images/countdown.png");
+
+    sound->playMusic("sounds/music.mp3");
 
     return true;
 }
@@ -87,26 +117,118 @@ void _scene::drawScene()
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // Clear buffers
     glLoadIdentity();
 
+    if(!pause) {
+        timer = 0;
+    }
+
+    //TODO:: ADD MAIN MENU HERE
+
     if(score < 10) {
-        bkgd->drawBackground(dim.x, dim.y);
-        bkgd->scroll(true, bkgd->UP, 0.1 * deltaTime);
-    }else if(score < 25) {//level 2
-        if(!lvl2) {//do once on level 2 start
+        if(!lvl1) {//do once on the start of level one
+            pause = true;
+            timer += deltaTime;
             player->reset();
-            for(int l = 0; l < ENMS_SIZE; l++) {
-                    enemies[l].reset();
-                    enemies[l].speed += 2.8; //make it harder
+
+            bkgd->drawBackground(dim.x, dim.y);
+
+            player->drawQuad();
+            lvls[0].drawBackground(dim.x, dim.y);
+            cD->drawCount();
+
+            if(timer > 1.1) {
+                cD->countIncrease();
+                frame++;
+                timer = 0;
             }
-            for(int l = 0; l < ASTEROID_SIZE; l++) {
-                    asteroids[l].reset();
-                    asteroids[l].myTex = asteroids[0].altTex;
+            if(frame >= 4) {
+                lvl1 = true;
+                pause = false;
+                for(int i = 0; i < ENMS_SIZE; i++) {
+                    enemies[i].reset();
+                }
+                for(int i = 0; i < ASTEROID_SIZE; i++) {
+                    asteroids[i].reset();
+                }
+                frame = 0;
             }
         }
-        lvl2 = true;
+
+        bkgd->drawBackground(dim.x, dim.y);
+        if(lvl1) bkgd->scroll(true, bkgd->UP, 0.1 * deltaTime);
+        else bkgd->scroll(false, bkgd->UP, 0);
+    }else if(score < 20) {//level 2
+        if(!lvl2) {//do once on level 2 start
+            pause = true;
+            player->reset();
+            timer += deltaTime;
+
+            bkgd2->drawBackground(dim.x, dim.y);
+
+            player->drawQuad();
+            lvls[1].drawBackground(dim.x, dim.y);
+            cD->drawCount();
+
+            if(timer > 1.1) {
+                cD->countIncrease();
+                frame++;
+                timer = 0;
+            }
+            if(frame >= 4) {
+                lvl2 = true;
+                pause = false;
+
+                for(int l = 0; l < ENMS_SIZE; l++) {
+                    enemies[l].reset();
+                    enemies[l].speed += 2.2; //make it harder
+                }
+                for(int l = 0; l < ASTEROID_SIZE; l++) {
+                    asteroids[l].reset();
+                    asteroids[l].myTex = asteroids[0].altTex;
+                }
+                frame = 0;
+            }
+        }
 
         bkgd2->drawBackground(dim.x, dim.y);
-        bkgd2->scroll(true, bkgd2->UP, 0.1 * deltaTime);
-    } else {
+        if(lvl2) bkgd2->scroll(true, bkgd2->UP, 0.1 * deltaTime);
+        else bkgd2->scroll(false, bkgd->UP, 0);
+    }else if(score < 30) {
+        if(!lvl3) {//do once on level 3 start
+            pause = true;
+            player->reset();
+            timer += deltaTime;
+
+            bkgd3->drawBackground(dim.x, dim.y);
+
+            player->drawQuad();
+            lvls[2].drawBackground(dim.x, dim.y);
+            cD->drawCount();
+
+            if(timer > 1.1) {
+                cD->countIncrease();
+                frame++;
+                timer = 0;
+            }
+            if(frame >= 4) {
+                lvl3 = true;
+                pause = false;
+
+                boss->reset();
+
+                for(int i = 0; i < ENMS_SIZE; i++) {
+                    enemies[i].reset();
+                }
+                for(int i = 0; i < ASTEROID_SIZE; i++) {
+                    asteroids[i].reset();
+                }
+                frame = 0;
+            }
+        }
+
+        bkgd3->drawBackground(dim.x, dim.y);
+        if(lvl3) bkgd3->scroll(true, bkgd2->UP, 0.1 * deltaTime);
+        else bkgd3->scroll(false, bkgd->UP, 0);
+    } else if(score > 34) {
         isGameOver = true;
         won->drawBackground(dim.x,dim.y);
     }
@@ -140,35 +262,31 @@ void _scene::drawScene()
 
                     asteroids[i].dirVec = normal;
                     asteroids[i].hitDir = asteroids[i].HIT;
-                    //old janky collision
-                    /*if(player->actionTrigger == player->RIGHTWALK) {
-                        if(asteroids[i].pos.y <= player->pos.y + 0.35)
-                            asteroids[i].hitDir = asteroids[i].RIGHT;
-                        else asteroids[i].hitDir = asteroids[i].UPRIGHT;
-                    }
-                    if(player->actionTrigger == player->LEFTWALK) {
-                        if(asteroids[i].pos.y <= player->pos.y + 0.35)
-                            asteroids[i].hitDir = asteroids[i].LEFT;
-                        else asteroids[i].hitDir = asteroids[i].UPLEFT;
-                    }
-                    if(player->actionTrigger == player->STAND) asteroids[i].hitDir = asteroids[i].UP;*/
+
+                    if(rand()%2) sound->playSounds("sounds/bump1.mp3");
+                    else sound->playSounds("sounds/bump2.mp3");
                 }
             }
 
             for(int k = 0; k < ENMS_SIZE; k++) {
-                if(hit->isRadialCol(enemies[k].pos, asteroids[i].pos, 0.2, asteroids[i].scale.x, 0.0000000001)) {
+                if(!lvl3 && hit->isRadialCol(enemies[k].pos, asteroids[i].pos, 0.2, asteroids[i].scale.x, 0.0000000001)) {
                     //asteroid enemy collision
                     if(asteroids[i].isHit && enemies[k].isEnmsLive) {
                         enemies[k].isEnmsLive = false;
                         enemies[k].actionTrigger = enemies[k].DEAD;
                         score++;
+                        //TODO:: add broken asteroid particles
+                        asteroids[i].reset();
                     }
                 }
-                if(hit->isRadialCol(player->pos, enemies[k].pos, 0.3, 0.4, 0.002)) {
+                if(hit->isRadialCol(player->pos, enemies[k].pos, 0.3, 0.4, 0.002) || hit->isRadialCol(boss->pos, player->pos, 0.5, 0.5, 0.00001)) {
                     //player died reset level
                     if(enemies[k].isEnmsLive) {
                         if(lvl2) score = 10;
-                        else score = 0;
+                        else if (lvl3) {
+                            score = 20;
+                            boss->reset();
+                        } else score = 0;
                         player->reset();
 
                         for(int l = 0; l < ENMS_SIZE; l++) enemies[l].reset();
@@ -176,16 +294,44 @@ void _scene::drawScene()
                     }
                 }
             }
+            if(lvl3) {
+                if(boss->canDamage && hit->isRadialCol(boss->pos, asteroids[i].pos, 0.2, asteroids[i].scale.x, 0.0000000001)) {
+                    if(asteroids[i].isHit) {
+                        boss->health -= 1;
+                        asteroids[i].reset();
+                    }
+                }
+            }
+
+            if(boss->health <= 0) boss->actionTrigger = boss->DEAD;
+            if(!boss->isBossLive) score += 5;
         }
 
-        for(int i = 0; i < ENMS_SIZE; i ++) {
-            enemies[i].enemyActions(deltaTime);
-            enemies[i].drawEnemy();
-        }
+        if(!lvl3) {
+            for(int i = 0; i < ENMS_SIZE; i ++) {
+                if(pause){
+                    enemies[i].actionTrigger = enemies[i].IDLE;
+                }
+                enemies[i].enemyActions(deltaTime);
+                enemies[i].drawEnemy();
+            }
 
-        for(int i = 0; i < ASTEROID_SIZE; i++) {
-            asteroids[i].animate(deltaTime);
-            asteroids[i].drawAsteroid();
+
+            for(int i = 0; i < ASTEROID_SIZE; i++) {
+                if(pause){
+                    asteroids[i].hitDir = asteroids[i].IDLE;
+                }
+                asteroids[i].animate(deltaTime);
+                asteroids[i].drawAsteroid();
+            }
+        } else {
+            boss->bossActions(deltaTime, player->pos);
+            boss->drawBoss();
+
+            for(int i = 0; i < ASTEROID_SIZE - 5; i++) {
+                asteroids[i].animate(deltaTime);
+                asteroids[i].drawAsteroid();
+            }
         }
     }
 }
