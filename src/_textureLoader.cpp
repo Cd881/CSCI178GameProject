@@ -1,13 +1,19 @@
 #include "_textureLoader.h"
+#include <iostream>
+using namespace std;
 
 _textureLoader::_textureLoader()
 {
-    //ctor
+    width = 0;
+    height = 0;
+    image = nullptr;
+    tex = 0;
 }
 
 _textureLoader::~_textureLoader()
 {
-    delete image;
+    // image is freed inside loadTexture after uploading to OpenGL
+    image = nullptr;
 }
 
 void _textureLoader::loadTexture(char* filename)
@@ -17,10 +23,17 @@ void _textureLoader::loadTexture(char* filename)
 
     image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA);
 
-    if(!image) cout << "ERROR: FAILED TO LOAD IMAGE/n";
+   if (!image)
+{
+    MessageBox(NULL, filename, "FAILED TO LOAD IMAGE", MB_OK);
+    return;
+}
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, image);
+
     SOIL_free_image_data(image);
+    image = nullptr;
 
     glEnable(GL_TEXTURE_2D);
 

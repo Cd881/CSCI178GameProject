@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="CSCI178GameProject" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/CSCI178GameProject" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Debug" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++17" />
+					<Add option="-g" />
+					<Add directory="include" />
+					<Add directory="C:/msys64/mingw64/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-mwindows" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
+					<Add library="glew32" />
+					<Add library="freeglut" />
+					<Add library="SOIL" />
+					<Add library="gdi32" />
+					<Add library="winmm" />
+					<Add directory="C:/msys64/mingw64/lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/CSCI178GameProject" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=c++17" />
+					<Add directory="include" />
+					<Add directory="C:/msys64/mingw64/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-mwindows" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
+					<Add library="glew32" />
+					<Add library="freeglut" />
+					<Add library="SOIL" />
+					<Add library="gdi32" />
+					<Add library="winmm" />
+					<Add directory="C:/msys64/mingw64/lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++17" />
+			<Add directory="include" />
+			<Add directory="../../../../../msys64/mingw64/include" />
+		</Compiler>
+		<Linker>
+			<Add library="opengl32" />
+			<Add library="glu32" />
+			<Add library="glew32" />
+			<Add library="freeglut" />
+			<Add library="gdi32" />
+			<Add library="winmm" />
+			<Add library="lib/libirrKlang.a" />
+			<Add library="lib/libSOIL.a" />
+			<Add directory="lib" />
+			<Add directory="../../../../../msys64/mingw64/lib" />
+		</Linker>
+		<Unit filename="include/_asteroid.h" />
+		<Unit filename="include/_boss.h" />
+		<Unit filename="include/_bullets.h" />
+		<Unit filename="include/_collisionCheck.h" />
+		<Unit filename="include/_common.h" />
+		<Unit filename="include/_countdown.h" />
+		<Unit filename="include/_enemy.h" />
+		<Unit filename="include/_hud.h" />
+		<Unit filename="include/_inputs.h" />
+		<Unit filename="include/_lightSettings.h" />
+		<Unit filename="include/_menu.h" />
+		<Unit filename="include/_model.h" />
+		<Unit filename="include/_modelVBO.h" />
+		<Unit filename="include/_parallax.h" />
+		<Unit filename="include/_particles.h" />
+		<Unit filename="include/_player.h" />
+		<Unit filename="include/_quad.h" />
+		<Unit filename="include/_scene.h" />
+		<Unit filename="include/_sounds.h" />
+		<Unit filename="include/_textureLoader.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="src/_asteroid.cpp" />
+		<Unit filename="src/_boss.cpp" />
+		<Unit filename="src/_bullets.cpp" />
+		<Unit filename="src/_collisionCheck.cpp" />
+		<Unit filename="src/_countdown.cpp" />
+		<Unit filename="src/_enemy.cpp" />
+		<Unit filename="src/_hud.cpp" />
+		<Unit filename="src/_inputs.cpp" />
+		<Unit filename="src/_lightSettings.cpp" />
+		<Unit filename="src/_menu.cpp" />
+		<Unit filename="src/_model.cpp" />
+		<Unit filename="src/_modelVBO.cpp" />
+		<Unit filename="src/_parallax.cpp" />
+		<Unit filename="src/_particles.cpp" />
+		<Unit filename="src/_player.cpp" />
+		<Unit filename="src/_quad.cpp" />
+		<Unit filename="src/_scene.cpp" />
+		<Unit filename="src/_sounds.cpp" />
+		<Unit filename="src/_textureLoader.cpp" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>

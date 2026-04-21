@@ -1,33 +1,43 @@
 #include "_sounds.h"
+#include <iostream>
+using namespace std;
 
 _sounds::_sounds()
 {
-    //ctor
+    isInitialized = false;
 }
 
 _sounds::~_sounds()
 {
-    //dtor
-    sndEng->drop();
-    delete sndEng;
-}
-
-void _sounds::playMusic(char* filename)
-{
-    sndEng->play2D(filename, true);
-}
-
-void _sounds::playSounds(char* filename)
-{
-    sndEng->play2D(filename, false, false);
-}
-
-void _sounds::pauseSound(char* filename)
-{
-    sndEng->play2D(filename, true, false);
+    // disabled
 }
 
 void _sounds::initSounds()
 {
-    if(!sndEng) cout << "ERROR: Sound Engine did not start\n";
+    cout << "Sound disabled" << endl;
+}
+
+void _sounds::playMusic(char* fileName)
+{
+    // disabled
+}
+
+void _sounds::stopMusic()
+{
+    // disabled
+}
+
+void _sounds::playSounds(char* fileName)
+{
+    // disabled
+}
+
+void _sounds::pauseAll()
+{
+    // disabled
+}
+
+void _sounds::resumeAll()
+{
+    // disabled
 }

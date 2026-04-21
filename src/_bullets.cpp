@@ -2,20 +2,17 @@
 
 _bullets::_bullets()
 {
-    //ctor
     pos.x = 0;
     pos.y = -4;
     pos.z = -6.99;
-
     rot.x = 0;
     rot.y = 0;
     rot.z = 0;
-
     scale.x = 0.2;
     scale.y = 0.2;
     scale.z = 1;
-
     actionTrigger = IDLE;
+    spinAngle = 0.0f;
 }
 
 _bullets::~_bullets()
@@ -23,75 +20,184 @@ _bullets::~_bullets()
     //dtor
 }
 
+void _bullets::drawFilledCircle(float radius, int segments)
+{
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        for(int i = 0; i <= segments; i++)
+        {
+            float angle = 2.0f * PI * i / segments;
+            glVertex3f(radius * cos(angle), radius * sin(angle), 0.0f);
+        }
+    glEnd();
+}
+
+void _bullets::drawCircle(float radius, int segments)
+{
+    glBegin(GL_LINE_LOOP);
+        for(int i = 0; i < segments; i++)
+        {
+            float angle = 2.0f * PI * i / segments;
+            glVertex3f(radius * cos(angle), radius * sin(angle), 0.0f);
+        }
+    glEnd();
+}
+
+void _bullets::drawLaser()
+{
+    if(!isLive) return;
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+        glTranslatef(pos.x, pos.y, pos.z);
+        glRotatef(spinAngle, 0.0f, 0.0f, 1.0f);
+
+        // Outer glow ring
+        glColor4f(0.0f, 0.5f, 1.0f, 0.4f);
+        drawCircle(0.18f, 24);
+
+        // Mid glow
+        glColor4f(0.0f, 0.8f, 1.0f, 0.7f);
+        drawFilledCircle(0.13f, 24);
+
+        // Inner bright core
+        glColor4f(0.8f, 1.0f, 1.0f, 1.0f);
+        drawFilledCircle(0.07f, 24);
+
+        // Specular highlight
+        glPushMatrix();
+            glTranslatef(-0.03f, 0.03f, 0.0f);
+            glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
+            drawFilledCircle(0.025f, 16);
+        glPopMatrix();
+
+        // Energy spikes
+        glLineWidth(2.0f);
+        glColor4f(0.0f, 1.0f, 1.0f, 0.9f);
+        glBegin(GL_LINES);
+            glVertex3f(-0.16f,  0.0f, 0.0f);
+            glVertex3f( 0.16f,  0.0f, 0.0f);
+            glVertex3f( 0.0f,  -0.16f, 0.0f);
+            glVertex3f( 0.0f,   0.16f, 0.0f);
+        glEnd();
+        glLineWidth(1.0f);
+
+    glPopMatrix();
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+}
+
+void _bullets::drawLaserEnemy()
+{
+    if(!isLive) return;
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+        glTranslatef(pos.x, pos.y, pos.z);
+        glRotatef(spinAngle, 0.0f, 0.0f, 1.0f);
+
+        // Outer glow - red/orange for enemy
+        glColor4f(1.0f, 0.0f, 0.0f, 0.4f);
+        drawCircle(0.22f, 24);
+
+        glColor4f(1.0f, 0.3f, 0.0f, 0.7f);
+        drawFilledCircle(0.16f, 24);
+
+        glColor4f(1.0f, 0.8f, 0.0f, 1.0f);
+        drawFilledCircle(0.09f, 24);
+
+        glPushMatrix();
+            glTranslatef(-0.04f, 0.04f, 0.0f);
+            glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
+            drawFilledCircle(0.03f, 16);
+        glPopMatrix();
+
+        glLineWidth(2.5f);
+        glColor4f(1.0f, 0.5f, 0.0f, 0.9f);
+        glBegin(GL_LINES);
+            glVertex3f(-0.20f,  0.0f, 0.0f);
+            glVertex3f( 0.20f,  0.0f, 0.0f);
+            glVertex3f( 0.0f,  -0.20f, 0.0f);
+            glVertex3f( 0.0f,   0.20f, 0.0f);
+        glEnd();
+
+        glPushMatrix();
+            glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+            glColor4f(1.0f, 0.2f, 0.0f, 0.6f);
+            glBegin(GL_LINES);
+                glVertex3f(-0.14f, 0.0f, 0.0f);
+                glVertex3f( 0.14f, 0.0f, 0.0f);
+                glVertex3f( 0.0f, -0.14f, 0.0f);
+                glVertex3f( 0.0f,  0.14f, 0.0f);
+            glEnd();
+        glPopMatrix();
+        glLineWidth(1.0f);
+
+    glPopMatrix();
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+}
+
 void _bullets::initBlt(int x, int y, char* filename)
 {
-    initQuad(filename);
+    if(filename != NULL)
+        initQuad(filename);
     xFrames = x;
     yFrames = y;
-
     xMin = 0.0;
     xMax = 1.0/(float)xFrames;
     yMin = 0.0;
     yMax = 1.0/(float)yFrames;
 }
 
-void _bullets::update(vec3 pos)
+void _bullets::update(vec3 p)
 {
-    //TODO:: depends on use of bullets
+    //depends on use
 }
 
-void _bullets::shoot(vec3 source, vec3 des, float deltaTime)
+void _bullets::shoot(vec3 src, vec3 des, float deltaTime)
 {
-    if(actionTrigger == IDLE) {
-        dest = des;
+    if(actionTrigger == IDLE) return;
 
-        //Translate to the center
-        float x = -source.x + des.x,
-              y = -source.y + des.y;
+    // Spin
+    spinAngle += 400.0f * deltaTime;
+    if(spinAngle > 360.0f) spinAngle -= 360.0f;
 
-        des.x >= 0 ? rot.z = atan((y/x)*180.0/PI)+90:rot.z = atan((y/x)*180.0/PI)-90;
+    timer += deltaTime;
+    if(timer > 0.008f)
+    {
+        pos.x = src.x + t * (dest.x - src.x);
+        pos.y = src.y + t * (dest.y - src.y);
+        pos.z = src.z;
 
-        //angle between two points
-        //arccos(dot product of the points)
-        /*float x = source.x * dest.x,
-              y = source.y * dest.y,
-              z = source.z * dest.z,
-              MS = sqrt(pow(source.x,2)+pow(source.y,2)+pow(source.z,2)), //mag of source
-              MD = sqrt(pow(dest.x,2)+pow(dest.y,2)+pow(dest.z,2)); //mag of dest
-
-        rot.z = acos((x + y + z) / (MS * MD));*/
-    }
-
-    if(isLive) {
-        timer += deltaTime;
-
-        if(timer > 0.08){
-            pos.x = source.x + t*(dest.x - source.x);
-            pos.y = source.y + t*(dest.y - source.y);
-            //pos.z = source.z + t*(dest.z - source.z);
-
-            if(actionTrigger == ACTIVE) {
-                if(t > 1) { //reset blt
-                    t = 0;
-                    actionTrigger = IDLE;
-                } else t += deltaTime+0.1;
+        if(actionTrigger == ACTIVE)
+        {
+            if(t >= 1.0f)
+            {
+                t = 0.0f;
+                actionTrigger = IDLE;
+                isLive = false;
             }
-
-            timer = 0;
+            else
+                t += deltaTime * 1.8f; // good travel speed
         }
+        timer = 0;
     }
 }
 
 void _bullets::bulletActions()
 {
-    switch(actionTrigger) {
-    case IDLE: //bullet is stored
+    switch(actionTrigger)
+    {
+    case IDLE:
         isLive = false;
         break;
-    case ACTIVE: //bullet is on the move
+    case ACTIVE:
         isLive = true;
         break;
-    case HIT: //bullet hit target or out of bounds
+    case HIT:
         isLive = false;
         break;
     default: break;
@@ -100,7 +206,8 @@ void _bullets::bulletActions()
 
 void _bullets::drawBlt()
 {
-    if(isLive) {
+    if(isLive)
+    {
         updateQuad();
         drawQuad();
     }

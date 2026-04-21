@@ -2,7 +2,7 @@
 #define _TEXTURELOADER_H
 
 #include <_common.h>
-#include <SOIL2.h>
+#include <SOIL.h>
 
 
 class _textureLoader

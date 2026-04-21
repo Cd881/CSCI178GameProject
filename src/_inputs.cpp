@@ -151,6 +151,16 @@ void _inputs::keyPressed(_player* p)
 {
     if(keys[65] || keys[37]) p->actionTrigger = p->LEFTWALK;//a or left
     if(keys[68] || keys[39]) p->actionTrigger = p->RIGHTWALK;//d or right
+
+    // SPACE to shoot
+    if(keys[VK_SPACE])
+    {
+        if(p->shootTimer > 0.1f) // limit fire rate
+        {
+            p->shootBullet();
+            p->shootTimer = 0.0f;
+        }
+    }
 }
 
 void _inputs::keyUp(_player *p)

@@ -21,7 +21,7 @@ class _quad
 
         GLuint vboPos, vboTex;
 
-        _textureLoader *myTex = new _textureLoader();
+       _textureLoader* myTex = nullptr;
 
         float xMin = 0.0,
               xMax = 1.0,

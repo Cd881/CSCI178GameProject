@@ -1,10 +1,6 @@
 #ifndef _SOUNDS_H
 #define _SOUNDS_H
-
 #include <_common.h>
-#include <SNDS/irrKlang.h>
-
-using namespace irrklang;
 
 class _sounds
 {
@@ -12,15 +8,16 @@ class _sounds
         _sounds();
         virtual ~_sounds();
 
-        void playMusic(char*);
-        void playSounds(char*);
-        void pauseSound(char*);
-        void initSounds();
+        bool isInitialized;
 
-        ISoundEngine *sndEng = createIrrKlangDevice();
+        void initSounds();
+        void playMusic(char* fileName);
+        void stopMusic();
+        void playSounds(char* fileName);
+        void pauseAll();
+        void resumeAll();
 
     protected:
-
     private:
 };
 
