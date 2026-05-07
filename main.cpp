@@ -12,63 +12,56 @@
 #include <_common.h>
 #include <_scene.h>
 
-HDC         hDC = NULL;
-HGLRC       hRC = NULL;
-HWND        hWnd = NULL;
+HDC         hDC=NULL;
+HGLRC       hRC=NULL;
+HWND        hWnd=NULL;
 HINSTANCE   hInstance;
 
-bool keys[256];
-bool active = TRUE;
-bool fullscreen = TRUE;
+bool    keys[256];
+bool    active=TRUE;
+bool    fullscreen=TRUE;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-_scene* myScene = nullptr;
+_scene *myScene = new _scene();
 
 void KillGLWindow()
 {
     if (fullscreen)
     {
-        ChangeDisplaySettings(NULL, 0);
+        ChangeDisplaySettings(NULL,0);
         ShowCursor(TRUE);
     }
 
     if (hRC)
     {
-        if (!wglMakeCurrent(NULL, NULL))
+        if (!wglMakeCurrent(NULL,NULL))
         {
-            MessageBox(NULL, "Release Of DC And RC Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+            MessageBox(NULL,"Release Of DC And RC Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         }
-
         if (!wglDeleteContext(hRC))
         {
-            MessageBox(NULL, "Release Rendering Context Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+            MessageBox(NULL,"Release Rendering Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         }
-        hRC = NULL;
+        hRC=NULL;
     }
 
-    if (hDC && !ReleaseDC(hWnd, hDC))
+    if (hDC && !ReleaseDC(hWnd,hDC))
     {
-        MessageBox(NULL, "Release Device Context Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-        hDC = NULL;
+        MessageBox(NULL,"Release Device Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+        hDC=NULL;
     }
 
     if (hWnd && !DestroyWindow(hWnd))
     {
-        MessageBox(NULL, "Could Not Release hWnd.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-        hWnd = NULL;
+        MessageBox(NULL,"Could Not Release hWnd.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+        hWnd=NULL;
     }
 
-    if (!UnregisterClass("OpenGL", hInstance))
+    if (!UnregisterClass("OpenGL",hInstance))
     {
-        MessageBox(NULL, "Could Not Unregister Class.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-        hInstance = NULL;
-    }
-
-    if (myScene)
-    {
-        delete myScene;
-        myScene = nullptr;
+        MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+        hInstance=NULL;
     }
 }
 
@@ -79,73 +72,73 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
     DWORD       dwExStyle;
     DWORD       dwStyle;
     RECT        WindowRect;
+    WindowRect.left=(long)0;
+    WindowRect.right=(long)width;
+    WindowRect.top=(long)0;
+    WindowRect.bottom=(long)height;
 
-    WindowRect.left = (long)0;
-    WindowRect.right = (long)width;
-    WindowRect.top = (long)0;
-    WindowRect.bottom = (long)height;
+    fullscreen=fullscreenflag;
 
-    fullscreen = fullscreenflag;
-
-    hInstance = GetModuleHandle(NULL);
-    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.lpfnWndProc = (WNDPROC)WndProc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hInstance = hInstance;
-    wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = NULL;
-    wc.lpszMenuName = NULL;
-    wc.lpszClassName = "OpenGL";
+    hInstance           = GetModuleHandle(NULL);
+    wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    wc.lpfnWndProc      = (WNDPROC) WndProc;
+    wc.cbClsExtra       = 0;
+    wc.cbWndExtra       = 0;
+    wc.hInstance        = hInstance;
+    wc.hIcon            = LoadIcon(NULL, IDI_WINLOGO);
+    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground    = NULL;
+    wc.lpszMenuName     = NULL;
+    wc.lpszClassName    = "OpenGL";
 
     if (!RegisterClass(&wc))
     {
-        MessageBox(NULL, "Failed To Register The Window Class.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
     if (fullscreen)
     {
         DEVMODE dmScreenSettings;
-        memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-        dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-        dmScreenSettings.dmPelsWidth = width;
-        dmScreenSettings.dmPelsHeight = height;
-        dmScreenSettings.dmBitsPerPel = bits;
-        dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+        memset(&dmScreenSettings,0,sizeof(dmScreenSettings));
+        dmScreenSettings.dmSize=sizeof(dmScreenSettings);
+        dmScreenSettings.dmPelsWidth    = width;
+        dmScreenSettings.dmPelsHeight   = height;
+        dmScreenSettings.dmBitsPerPel   = bits;
+        dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
-        dwExStyle = WS_EX_APPWINDOW;
-        dwStyle = WS_POPUP;
+        dwExStyle=WS_EX_APPWINDOW;
+        dwStyle=WS_POPUP;
         ShowCursor(TRUE);
     }
     else
     {
-        dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-        dwStyle = WS_OVERLAPPEDWINDOW;
+        dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+        dwStyle=WS_OVERLAPPEDWINDOW;
     }
 
     AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);
 
-    if (!(hWnd = CreateWindowEx(
-            dwExStyle,
-            "OpenGL",
-            title,
-            dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-            0, 0,
-            WindowRect.right - WindowRect.left,
-            WindowRect.bottom - WindowRect.top,
-            NULL,
-            NULL,
-            hInstance,
-            NULL)))
+    if (!(hWnd=CreateWindowEx(  dwExStyle,
+                                "OpenGL",
+                                title,
+                                dwStyle |
+                                WS_CLIPSIBLINGS |
+                                WS_CLIPCHILDREN,
+                                0, 0,
+                                WindowRect.right-WindowRect.left,
+                                WindowRect.bottom-WindowRect.top,
+                                NULL,
+                                NULL,
+                                hInstance,
+                                NULL)))
     {
         KillGLWindow();
-        MessageBox(NULL, "Window Creation Error.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Window Creation Error.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    static PIXELFORMATDESCRIPTOR pfd =
+    static PIXELFORMATDESCRIPTOR pfd=
     {
         sizeof(PIXELFORMATDESCRIPTOR),
         1,
@@ -167,138 +160,153 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
         0, 0, 0
     };
 
-    if (!(hDC = GetDC(hWnd)))
+    if (!(hDC=GetDC(hWnd)))
     {
         KillGLWindow();
-        MessageBox(NULL, "Can't Create A GL Device Context.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Can't Create A GL Device Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if (!(PixelFormat = ChoosePixelFormat(hDC, &pfd)))
+    if (!(PixelFormat=ChoosePixelFormat(hDC,&pfd)))
     {
         KillGLWindow();
-        MessageBox(NULL, "Can't Find A Suitable PixelFormat.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Can't Find A Suitable PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if (!SetPixelFormat(hDC, PixelFormat, &pfd))
+    if(!SetPixelFormat(hDC,PixelFormat,&pfd))
     {
         KillGLWindow();
-        MessageBox(NULL, "Can't Set The PixelFormat.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Can't Set The PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if (!(hRC = wglCreateContext(hDC)))
+    if (!(hRC=wglCreateContext(hDC)))
     {
         KillGLWindow();
-        MessageBox(NULL, "Can't Create A GL Rendering Context.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Can't Create A GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if (!wglMakeCurrent(hDC, hRC))
+    if(!wglMakeCurrent(hDC,hRC))
     {
         KillGLWindow();
-        MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Can't Activate The GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    ShowWindow(hWnd, SW_SHOW);
+    ShowWindow(hWnd,SW_SHOW);
     SetForegroundWindow(hWnd);
     SetFocus(hWnd);
 
-    myScene->reSize(width, height);
-
-    if (!myScene->initGL())
+    myScene->reSize(width,height);
+    if(!myScene->initGL())
     {
         KillGLWindow();
-        MessageBox(NULL, "Can't initialize GL.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL,"Can't initialize GL.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
     return TRUE;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(   HWND    hWnd,
+                            UINT    uMsg,
+                            WPARAM  wParam,
+                            LPARAM  lParam)
 {
     switch (uMsg)
     {
-    case WM_ACTIVATE:
-        if (!HIWORD(wParam))
-            active = TRUE;
-        else
-            active = FALSE;
-        return 0;
-
-    case WM_SYSCOMMAND:
-        switch (wParam)
+        case WM_ACTIVATE:
         {
-        case SC_SCREENSAVE:
-        case SC_MONITORPOWER:
+            if (!HIWORD(wParam))
+                active=TRUE;
+            else
+                active=FALSE;
             return 0;
         }
-        break;
 
-    case WM_CLOSE:
-        PostQuitMessage(0);
-        return 0;
+        case WM_SYSCOMMAND:
+        {
+            switch (wParam)
+            {
+                case SC_SCREENSAVE:
+                case SC_MONITORPOWER:
+                return 0;
+            }
+            break;
+        }
 
-    case WM_KEYDOWN:
-        if (myScene) myScene->winMsg(hWnd, uMsg, wParam, lParam);
-        keys[wParam] = TRUE;
-        return 0;
+        case WM_CLOSE:
+        {
+            PostQuitMessage(0);
+            return 0;
+        }
 
-    case WM_KEYUP:
-        if (myScene) myScene->winMsg(hWnd, uMsg, wParam, lParam);
-        keys[wParam] = FALSE;
-        return 0;
+        case WM_KEYDOWN:
+        {
+            myScene->winMsg(hWnd,uMsg,wParam,lParam);
+            keys[wParam] = TRUE;
+            return 0;
+        }
 
-    case WM_SIZE:
-        if (myScene) myScene->reSize(LOWORD(lParam), HIWORD(lParam));
-        return 0;
+        case WM_KEYUP:
+        {
+            myScene->winMsg(hWnd,uMsg,wParam,lParam);
+            keys[wParam] = FALSE;
+            return 0;
+        }
 
-    case WM_LBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_LBUTTONUP:
-    case WM_RBUTTONUP:
-    case WM_MBUTTONUP:
-    case WM_MOUSEWHEEL:
-    case WM_MOUSEMOVE:
-        if (myScene) myScene->winMsg(hWnd, uMsg, wParam, lParam);
-        break;
+        case WM_SIZE:
+        {
+            myScene->reSize(LOWORD(lParam),HIWORD(lParam));
+            return 0;
+        }
+
+        case WM_LBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_MOUSEMOVE:
+        case WM_MOUSEWHEEL:
+            myScene->winMsg(hWnd,uMsg,wParam,lParam);
+            break;
     }
 
-    return DefWindowProc(hWnd, uMsg, wParam, lParam);
+    return DefWindowProc(hWnd,uMsg,wParam,lParam);
 }
 
-int WINAPI WinMain(HINSTANCE hInstance,
-                   HINSTANCE hPrevInstance,
-                   LPSTR lpCmdLine,
-                   int nCmdShow)
+int WINAPI WinMain( HINSTANCE   hInstance,
+                    HINSTANCE   hPrevInstance,
+                    LPSTR       lpCmdLine,
+                    int         nCmdShow)
 {
     int argc = 0;
     glutInit(&argc, NULL);
 
-    MSG msg;
-    BOOL done = FALSE;
+    MSG     msg;
+    BOOL    done=FALSE;
 
-    int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int fullscreenWidth  = GetSystemMetrics(SM_CXSCREEN);
     int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-    myScene = new _scene();
-
-    if (!CreateGLWindow((char*)"Game Engine Lesson 01", fullscreenWidth, fullscreenHeight, 256, fullscreen))
+    if (!CreateGLWindow("Space Invaders 178",
+                         fullscreenWidth,
+                         fullscreenHeight,
+                         256, fullscreen))
     {
         return 0;
     }
 
-    while (!done)
+    while(!done)
     {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
         {
-            if (msg.message == WM_QUIT)
+            if (msg.message==WM_QUIT)
             {
-                done = TRUE;
+                done=TRUE;
             }
             else
             {
@@ -308,9 +316,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
         }
         else
         {
-            if (keys[VK_ESCAPE] && myScene->menu->currentState == _menu::MENU)
+            // ESC only quits from menu
+            if(keys[VK_ESCAPE] &&
+               myScene->menu->currentState == _menu::MENU)
             {
-                done = TRUE;
+                done=TRUE;
             }
             else
             {
@@ -320,12 +330,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             if (keys[VK_F1])
             {
-                keys[VK_F1] = FALSE;
+                keys[VK_F1]=FALSE;
                 KillGLWindow();
-                fullscreen = !fullscreen;
-                myScene = new _scene();
-
-                if (!CreateGLWindow((char*)"Game Engine Lesson 01", fullscreenWidth, fullscreenHeight, 256, fullscreen))
+                fullscreen=!fullscreen;
+                if (!CreateGLWindow("Space Invaders 178",
+                                     fullscreenWidth,
+                                     fullscreenHeight,
+                                     256, fullscreen))
                 {
                     return 0;
                 }

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1776751584 source:c:\users\harma\onedrive\desktop\csci178gameproject\main.cpp
+1777967280 source:c:\users\harma\onedrive\desktop\csci178gameproject\main.cpp
 	<windows.h>
 	<_common.h>
 	<_scene.h>
@@ -1080,7 +1080,7 @@
 	<_common.h>
 	<_textureLoader.h>
 
-1776318472 c:\users\harma\onedrive\desktop\csci178gameproject\include\_parallax.h
+1777937351 c:\users\harma\onedrive\desktop\csci178gameproject\include\_parallax.h
 	<_common.h>
 	<_textureLoader.h>
 
@@ -1274,7 +1274,7 @@
 1776318472 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_modelvbo.cpp
 	"_modelVBO.h"
 
-1776318472 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_parallax.cpp
+1777937378 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_parallax.cpp
 	"_parallax.h"
 
 1776318472 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_particles.cpp
@@ -1288,10 +1288,10 @@
 1776328874 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_quad.cpp
 	"_quad.h"
 
-1776752524 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_scene.cpp
+1777970704 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_scene.cpp
 	"_scene.h"
 
-1776326037 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_sounds.cpp
+1776752882 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_sounds.cpp
 	"_sounds.h"
 	<iostream>
 
@@ -2323,7 +2323,7 @@
 1776749150 c:\users\harma\onedrive\desktop\csci178gameproject\include\_hud.h
 	<_common.h>
 
-1776751293 c:\users\harma\onedrive\desktop\csci178gameproject\include\_menu.h
+1777968869 c:\users\harma\onedrive\desktop\csci178gameproject\include\_menu.h
 	<_common.h>
 	<_textureLoader.h>
 
@@ -2341,9 +2341,21 @@
 1772093631 c:\msys64\mingw64\include\sec_api\stdio_s.h
 	<stdio.h>
 
-1776751134 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_menu.cpp
+1777969844 source:c:\users\harma\onedrive\desktop\csci178gameproject\src\_menu.cpp
 	"_menu.h"
 	<GL/glut.h>
 	<math.h>
 	<stdio.h>
+
+1763381584 c:\msys64\mingw64\include\gl\freeglut.h
+	"freeglut_std.h"
+	"freeglut_ext.h"
+
+1763381584 c:\msys64\mingw64\include\gl\freeglut_ext.h
+	<stdarg.h>
+	"freeglut_ucall.h"
+
+1763381584 c:\msys64\mingw64\include\gl\freeglut_ucall.h
+	<stdarg.h>
+	<stdlib.h>
 

@@ -19,22 +19,28 @@ class _menu
         void drawHelp();
         void drawPause();
 
-        // Input handling — returns true if state changed to GAME
         bool handleKey(WPARAM wParam);
         bool handleClick(double mouseY);
 
-        bool shouldQuit;    // set true when E/ESC pressed on menu
-        bool startGame;     // set true when N pressed
-        bool restartGame;   // set true to restart
+        bool shouldQuit;
+        bool startGame;
+        bool restartGame;
 
     private:
         _textureLoader* landingTex;
         _textureLoader* menuTex;
         _textureLoader* helpTex;
+        _textureLoader* panelTex;
 
+        void setupProjection();
+        void drawFullScreenBg(GLuint tex);
         void drawText(float x, float y, float z,
                       const char* text, void* font);
-        void drawFilledRect(float x, float y, float w, float h, float z);
+        void drawFilledRect(float x, float y,
+                            float w, float h, float z);
+        void drawOutlineRect(float x, float y,
+                             float w, float h, float z);
+        void drawPanel(float x, float y, float w, float h);
 };
 
 #endif // _MENU_H

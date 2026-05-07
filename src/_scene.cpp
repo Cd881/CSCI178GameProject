@@ -22,7 +22,7 @@ _scene::_scene()
     killStreak      = 0;
     streakTimer     = 0.0f;
     isPlayerDead    = false;
-    shootSoundTimer = 0.0f;  // NEW
+    shootSoundTimer = 0.0f;
 
     lights = new _lightSettings();
     input  = new _inputs();
@@ -72,9 +72,18 @@ GLint _scene::initGL()
 
     menu->init();
 
-    bkgd->initPrlx((char*)"images/spacebackground.png");
-    bkgd2->initPrlx((char*)"images/space2.png");
-    bkgd3->initPrlx((char*)"images/space3.png");
+// Level 1 — calm, slow scroll
+bkgd->initPrlx((char*)"images/level1bg.png");
+bkgd->initPrlx2((char*)"images/spacebackground.png");
+
+// Level 2 — chaotic, medium scroll
+bkgd2->initPrlx((char*)"images/level2bg.png");
+bkgd2->initPrlx2((char*)"images/level1bg.png");
+
+// Level 3 — intense, fast scroll
+bkgd3->initPrlx((char*)"images/level3bg.png");
+bkgd3->initPrlx2((char*)"images/level2bg.png");
+
     won->initPrlx((char*)"images/won.png");
 
     asteroids[0].initAsteroid(rand() % 16, (char*)"images/Asteroids.png");
@@ -116,9 +125,7 @@ GLint _scene::initGL()
     hud->init(&playerHealth, &score, &kills, &multiplier,
                &boss->health, &lvl3, &isPlayerDead, &isGameOver);
 
-    // Init and start level 1 music
     sound->initSounds();
-    sound->playMusic((char*)"sounds/music.mp3");
 
     return true;
 }
@@ -161,14 +168,11 @@ void _scene::resetGame()
     cD->countDownInit(1, 4, (char*)"images/countdown.png");
     for(int i = 0; i < ENMS_SIZE; i++)    enemies[i].reset();
     for(int i = 0; i < ASTEROID_SIZE; i++) asteroids[i].reset();
-
-    // Restart level 1 music
-    sound->playMusic((char*)"sounds/music.mp3");
 }
 
 void _scene::playerTakeDamage()
 {
-    sound->playSounds((char*)"sounds/bump2.mp3");  // damage sound
+    sound->playSounds((char*)"sounds/bump2.mp3");
 
     playerHealth--;
     killStreak  = 0;
@@ -191,6 +195,18 @@ void _scene::playerTakeDamage()
 
 void _scene::drawGame()
 {
+    // Reset projection to game settings first
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    GLfloat aspectRatio = dim.x / dim.y;
+    gluPerspective(45.0, aspectRatio, 0.1, 100.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Clean any leftover texture state from menu
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
     streakTimer     += deltaTime;
     shootSoundTimer += deltaTime;
 
@@ -226,7 +242,7 @@ void _scene::drawGame()
             }
         }
         bkgd->drawBackground(dim.x, dim.y);
-        if(lvl1) bkgd->scroll(true,  bkgd->UP, 0.1f * deltaTime);
+        if(lvl1) bkgd->scroll(true,  bkgd->UP, 0.05f * deltaTime);
         else      bkgd->scroll(false, bkgd->UP, 0);
     }
     else if(score < 20)
@@ -256,13 +272,11 @@ void _scene::drawGame()
                     asteroids[l].myTex = asteroids[0].altTex;
                 }
                 frame = 0;
-
-                // Level 2 music
                 sound->playMusic((char*)"sounds/music1.mp3");
             }
         }
         bkgd2->drawBackground(dim.x, dim.y);
-        if(lvl2) bkgd2->scroll(true,  bkgd2->UP, 0.1f * deltaTime);
+        if(lvl2) bkgd2->scroll(true,  bkgd2->UP, 0.12f * deltaTime);
         else      bkgd2->scroll(false, bkgd->UP,  0);
     }
     else if(score < 30)
@@ -285,13 +299,11 @@ void _scene::drawGame()
                 for(int i = 0; i < ENMS_SIZE; i++)    enemies[i].reset();
                 for(int i = 0; i < ASTEROID_SIZE; i++) asteroids[i].reset();
                 frame = 0;
-
-                // Level 3 boss music
                 sound->playMusic((char*)"sounds/musicloud.mp3");
             }
         }
         bkgd3->drawBackground(dim.x, dim.y);
-        if(lvl3) bkgd3->scroll(true,  bkgd2->UP, 0.1f * deltaTime);
+        if(lvl3) bkgd3->scroll(true,  bkgd2->UP, 0.22f * deltaTime);
         else      bkgd3->scroll(false, bkgd->UP,  0);
     }
     else if(score > 34)
@@ -308,14 +320,12 @@ void _scene::drawGame()
         player->updateQuad();
         player->drawQuad();
 
-        // Shoot sound
         if(input->keys[VK_SPACE] && shootSoundTimer > 0.1f)
         {
             sound->playSounds((char*)"sounds/laser1.mp3");
             shootSoundTimer = 0.0f;
         }
 
-        // Boss fired sound
         if(boss->justFired)
         {
             sound->playSounds((char*)"sounds/laser2.mp3");
@@ -348,7 +358,6 @@ void _scene::drawGame()
 
             for(int k = 0; k < ENMS_SIZE; k++)
             {
-                // Asteroid kills enemy
                 if(!lvl3 && hit->isRadialCol(enemies[k].pos, asteroids[i].pos,
                                               0.2, asteroids[i].scale.x, 0.0000000001))
                 {
@@ -357,7 +366,7 @@ void _scene::drawGame()
                         enemies[k].isEnmsLive    = false;
                         enemies[k].actionTrigger = enemies[k].DEAD;
                         asteroids[i].reset();
-                        sound->playSounds((char*)"sounds/bump1.mp3"); // enemy death
+                        sound->playSounds((char*)"sounds/bump1.mp3");
                         kills++;
                         killStreak++;
                         streakTimer = 0.0f;
@@ -370,7 +379,6 @@ void _scene::drawGame()
                     }
                 }
 
-                // Enemy hits player
                 if(hit->isRadialCol(player->pos, enemies[k].pos, 0.3, 0.4, 0.002))
                 {
                     if(enemies[k].isEnmsLive)
@@ -385,7 +393,6 @@ void _scene::drawGame()
                     }
                 }
 
-                // Boss hits player
                 if(hit->isRadialCol(boss->pos, player->pos, 0.5, 0.5, 0.00001))
                 {
                     playerTakeDamage();
@@ -393,7 +400,6 @@ void _scene::drawGame()
                 }
             }
 
-            // Boss vs asteroid
             if(lvl3 && boss->canDamage &&
                hit->isRadialCol(boss->pos, asteroids[i].pos,
                                 0.2, asteroids[i].scale.x, 0.0000000001))
@@ -414,7 +420,6 @@ void _scene::drawGame()
         {
             if(!player->bullets[b].isLive) continue;
 
-            // Bullet kills enemy
             for(int k = 0; k < ENMS_SIZE; k++)
             {
                 if(hit->isRadialCol(player->bullets[b].pos,
@@ -426,7 +431,7 @@ void _scene::drawGame()
                         enemies[k].actionTrigger = enemies[k].DEAD;
                         player->bullets[b].isLive        = false;
                         player->bullets[b].actionTrigger = _bullets::IDLE;
-                        sound->playSounds((char*)"sounds/bump1.mp3"); // enemy death
+                        sound->playSounds((char*)"sounds/bump1.mp3");
                         kills++;
                         killStreak++;
                         streakTimer = 0.0f;
@@ -440,7 +445,6 @@ void _scene::drawGame()
                 }
             }
 
-            // Bullet hits asteroid
             for(int a = 0; a < ASTEROID_SIZE; a++)
             {
                 if(hit->isRadialCol(player->bullets[b].pos,
@@ -453,14 +457,13 @@ void _scene::drawGame()
                 }
             }
 
-            // Bullet hits boss
             if(lvl3 && hit->isRadialCol(player->bullets[b].pos,
                                          boss->pos, 0.15, 0.5, 0.001))
             {
                 boss->health -= 1;
                 player->bullets[b].isLive        = false;
                 player->bullets[b].actionTrigger = _bullets::IDLE;
-                sound->playSounds((char*)"sounds/bump1.mp3"); // boss hit
+                sound->playSounds((char*)"sounds/bump1.mp3");
             }
         }
 
@@ -512,17 +515,14 @@ void _scene::drawGame()
     }
     else if(isGameOver)
     {
-        // Still draw everything frozen when game over
         player->drawQuad();
         if(!lvl3)
         {
-            for(int i = 0; i < ENMS_SIZE; i++)  enemies[i].drawEnemy();
+            for(int i = 0; i < ENMS_SIZE; i++)    enemies[i].drawEnemy();
             for(int i = 0; i < ASTEROID_SIZE; i++) asteroids[i].drawAsteroid();
         }
         else
-        {
             boss->drawBoss();
-        }
     }
 
     hud->draw();
@@ -538,14 +538,38 @@ void _scene::drawScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    if(menu->currentState == _menu::GAME ||
-       menu->currentState == _menu::PAUSE)
+    switch(menu->currentState)
     {
-        drawGame();
+        case _menu::GAME:
+            drawGame();
+            break;
+
+        case _menu::PAUSE:
+            drawGame();
+            menu->draw();
+            // Full reset after menu draw
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_TEXTURE_2D);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            break;
+
+        default:
+            menu->draw();
+            // Full reset after menu draw
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_TEXTURE_2D);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            break;
     }
 
-    if(menu->currentState != _menu::GAME)
-        menu->draw();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
 }
 
 void _scene::mouseMapping(int x, int y)
@@ -589,7 +613,6 @@ int _scene::winMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             if(menu->shouldQuit) PostQuitMessage(0);
 
-            // Resume sound when unpausing
             if(wasPaused && menu->currentState == _menu::GAME)
                 sound->resumeAll();
         }
@@ -598,7 +621,7 @@ int _scene::winMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if(wParam == VK_ESCAPE)
             {
                 menu->currentState = _menu::PAUSE;
-                sound->pauseAll();  // pause music on pause
+                sound->pauseAll();
             }
             else
             {
